@@ -1030,8 +1030,9 @@ def generate_batch_static(
         if not idxs:
             continue
 
-        # Honor caller-provided zh_mode override for consistency with _generate_once.
-        lang_cfg = _LangCfg(lang, zh_mode_override=zh_mode, en_only_override=en_only_hard)
+        # Honor caller-provided zh_mode override, but only enforce en-only for English.
+        lang_en_only = (en_only_hard if lang == "en" else False)
+        lang_cfg = _LangCfg(lang, zh_mode_override=zh_mode, en_only_override=lang_en_only)
 
         # Build chat-formatted prompts for the batch.
         chat_texts = []
@@ -1103,8 +1104,10 @@ def _generate_once(
     use_cache_prefer: bool = True,
     en_only_hard: bool = True,
 ) -> str:
+    _lang = detect_lang(prompt_text)
+    en_only_hard = (en_only_hard if _lang == "en" else False)
     # Configure language-specific behavior (zh penalty / en-only, etc.).
-    lang_cfg = _LangCfg(detect_lang(prompt_text), zh_mode_override=zh_mode, en_only_override=en_only_hard)
+    lang_cfg = _LangCfg(_lang, zh_mode_override=zh_mode, en_only_override=en_only_hard)
 
     clean_prompt = sanitize_user_prompt(prompt_text)
     user_text = f"{clean_prompt}\n\n{lang_cfg.anti}\n{lang_cfg.answer}"
@@ -1202,7 +1205,8 @@ def generate_batch_retry_dynamic(
         idxs = [i for i, l in enumerate(langs) if l == lang]
         if not idxs:
             continue
-        lang_cfg = _LangCfg(lang, zh_mode_override=zh_mode, en_only_override=en_only_hard)
+        lang_en_only = (en_only_hard if lang == "en" else False)
+        lang_cfg = _LangCfg(lang, zh_mode_override=zh_mode, en_only_override=lang_en_only)
 
         for s in range(0, len(idxs), micro_batch_size):
             batch_ids = idxs[s:s + micro_batch_size]
@@ -1279,6 +1283,7 @@ def generate_batch_retry_dynamic(
                     # Per-sample fallback with dynamic bad-words.
                     for i in batch_ids:
                         try:
+                            en_only_local = (en_only_hard if detect_lang(src_prompts[i]) == "en" else False)
                             ans = _generate_once(
                                 tokenizer, model, gen_cfg, static_bads,
                                 prompt_text=src_prompts[i],
@@ -1286,7 +1291,7 @@ def generate_batch_retry_dynamic(
                                 zh_mode=zh_mode, zh_penalty=zh_penalty,
                                 include_dynamic_bad_words=True,
                                 use_cache_prefer=True,
-                                en_only_hard=en_only_hard,
+                                en_only_hard=en_only_local,
                             )
                             cleaned = remove_echo_full(sanitize_user_prompt(src_prompts[i]), ans)
                             if cleaned:
@@ -1329,6 +1334,7 @@ def generate_batch_retry_dynamic(
         if not r:
             print(f"[FALLBACK] static-only for sample idx={i}")
             try:
+                en_only_local = (en_only_hard if detect_lang(src_prompts[i]) == "en" else False)
                 ans2 = _generate_once(
                     tokenizer, model, gen_cfg, static_bads,
                     prompt_text=src_prompts[i],
@@ -1336,7 +1342,7 @@ def generate_batch_retry_dynamic(
                     zh_mode=zh_mode, zh_penalty=zh_penalty,
                     include_dynamic_bad_words=False,
                     use_cache_prefer=True,
-                    en_only_hard=en_only_hard,
+                    en_only_hard=en_only_local,
                 )
                 results[i] = remove_echo_light(ans2) or "[GENERATION_ERROR: empty_after_retries]"
             except Exception:
@@ -1361,6 +1367,7 @@ def safe_llama_answer_no_token_reduce(
     2) If that fails, retry with static-only bad-words (still use_cache=True) and do a light echo cleanup.
     Returns a best-effort cleaned answer or a GENERATION_ERROR marker.
     """
+    en_only_local = (en_only_hard if detect_lang(src_prompt) == "en" else False)
     last_err = None
     text1, text2 = "", ""
 
@@ -1373,7 +1380,7 @@ def safe_llama_answer_no_token_reduce(
             zh_mode=zh_mode, zh_penalty=zh_penalty,
             include_dynamic_bad_words=True,
             use_cache_prefer=True,
-            en_only_hard=en_only_hard
+            en_only_hard=en_only_local
         )
         ans1 = remove_echo_full(sanitize_user_prompt(src_prompt), text1)
         if ans1.strip():
@@ -1403,7 +1410,7 @@ def safe_llama_answer_no_token_reduce(
             zh_mode=zh_mode, zh_penalty=zh_penalty,
             include_dynamic_bad_words=False,
             use_cache_prefer=True,
-            en_only_hard=en_only_hard
+            en_only_hard=en_only_local
         )
         ans2 = remove_echo_light(text2)
         if ans2.strip():

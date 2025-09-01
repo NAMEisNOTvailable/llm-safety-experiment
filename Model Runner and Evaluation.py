@@ -65,18 +65,19 @@ except Exception:
 
 
 # ---- Environment setup ----
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:256"
-torch.backends.cuda.matmul.allow_tf32 = True
-try:
-    torch.backends.cudnn.benchmark = True
-except Exception:
-    pass
-os.environ.setdefault("TORCH_ALLOW_TF32", "1")
-os.environ.setdefault("TOKENIZERS_PARALLELISM", "true") 
-os.environ.setdefault("OMP_NUM_THREADS", str(os.cpu_count()))
-os.environ.setdefault("MKL_NUM_THREADS", str(os.cpu_count()))
-torch.set_num_threads(max(1, os.cpu_count()//2))
-print("FA2 available:", is_flash_attn_2_available())
+def setup_env():
+    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:256"
+    torch.backends.cuda.matmul.allow_tf32 = True
+    try:
+        torch.backends.cudnn.benchmark = True
+    except Exception:
+        pass
+    os.environ.setdefault("TORCH_ALLOW_TF32", "1")
+    os.environ.setdefault("TOKENIZERS_PARALLELISM", "true")
+    os.environ.setdefault("OMP_NUM_THREADS", str(os.cpu_count()))
+    os.environ.setdefault("MKL_NUM_THREADS", str(os.cpu_count()))
+    torch.set_num_threads(max(1, os.cpu_count() // 2))
+    print("FA2 available:", is_flash_attn_2_available())
 
 
 
@@ -3645,11 +3646,6 @@ def main():
             if processed % args.print_every == 0 or processed == len(todo):
                 print(f"Processed: {processed}/{len(todo)}")
 
-            torch.cuda.synchronize()
-            if torch.cuda.is_available():
-                torch.cuda.synchronize()
-                torch.cuda.empty_cache()
-            gc.collect()
 
             if torch.cuda.is_available():
                 torch.cuda.synchronize()
@@ -3697,4 +3693,5 @@ def main():
 
 
 if __name__ == "__main__":
+    setup_env()
     main()

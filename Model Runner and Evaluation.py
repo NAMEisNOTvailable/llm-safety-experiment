@@ -3444,23 +3444,23 @@ def main():
     token_budget = args.max_new_main
     MIN_TOKEN_BUDGET = 128
     processed = 0
-    # 自适应批大小
+
     B_init = args.batch_size
     B = B_init
     idx = 0
-    ok_streak = 0          # 连续成功批次数
-    GROW_AFTER_OK = 2      # 连续成功多少批后尝试增大批大小
+    ok_streak = 0          
+    GROW_AFTER_OK = 2      
     VERBOSE = True
-    SAFE_MAX_B = None      # 动态记忆“别再超过”的上限；None 表示未知
-    HYSTERESIS = 2         # 滞回（OOM 后上限=出事批次-2）
-    GROW_STEP = 4          # 每次最多+2，避免激进跨越
+    SAFE_MAX_B = None    
+    HYSTERESIS = 2         
+    GROW_STEP = 4          
 
     while idx < len(todo):
         cur_B = min(B, len(todo) - idx)
         batch_items = todo[idx: idx + cur_B]
         log_cuda_mem(f"pre_batch_idx={idx}_B={cur_B}")
 
-        # 预先准备：收集原始 prompt，并做最小清洗（去系统标签等）
+        # Pre-preparation: Collect the original prompt and do minimal cleaning (remove system tags, etc.)
         src_prompts = []
         prompts_clean = []
         for it in batch_items:
@@ -3469,7 +3469,7 @@ def main():
             prompts_clean.append(sanitize_user_prompt(src))
 
         try:
-            # 1) 批量主生成（静态 bad-words + use_cache=True，速度快）
+            # 1) Batch master generation (static bad-words + use_cache=True)
             batch_answers = generate_batch_static(
                 tokenizer, model, gen_cfg, static_bads,
                 prompts_clean=prompts_clean,
@@ -3478,7 +3478,7 @@ def main():
                 en_only_hard=args.en_only_hard
             )
 
-            # 2) 对于明显回声/空输出/清理后太短的，做单条兜底重试（动态 bad-words）
+            # 2) For obvious echoes, empty output, or output that is too short after cleaning, perform a single fallback retry (dynamic bad-words)
             final_answers = [None] * len(batch_items)
             need_idxs, need_src = [], []
 
@@ -3506,27 +3506,27 @@ def main():
                     # keep the static-gen cleaned result (already "", so mark a known error)
                     final_answers[j] = "[GENERATION_ERROR: empty_after_static]"
 
-            # 3) 评估（保持你现有的 batch 评审方式；若想进一步省 GPU，见下文优化2）
+            # 3) Evaluation
             # --- PATCH BEGIN: self-judge fusion per item ---
             for it, ans in zip(batch_items, final_answers):
-                # 先拿评测指令与目标
+                # goals
                 idx_num = int(it["idx"])
                 category = it.get("category")
                 eval_instr = get_eval_instruction(it)
                 targets    = extract_eval_targets(it)
 
-                # 1) 规则通道（真值表）
+                # 1) Truth Table
                 rules_out = evaluate_rules(ans, eval_instr, targets, rumor_relaxed=args.rumor_relaxed)
                 label_rules = rules_out["label_rules"]
                 E          = rules_out["E"]
                 R_known    = rules_out["R_known"]
                 R_val      = rules_out["R"]
 
-                # 2) 风险分
+                # 2) Risk
                 topics = infer_topics_from_instruction(eval_instr)
                 risk = _risk_score(ans, topics, targets)
 
-                # 3) 第一次小裁判
+                # 3) First Judgment
                 if not args.no_judge:
                     label_llm, conf_llm = run_external_judge(
                         ans, backend=args.judge_backend, clf_pack=G_JUDGE_CLS,
@@ -3538,7 +3538,7 @@ def main():
                 else:
                     label_llm, conf_llm = None, 0.0
 
-                # 4) 是否复判
+                # 4) Rejudgment or Not
                 DISAGREE = (label_llm is not None and label_llm != label_rules)
                 NEED_REJUDGE = False
                 if (not args.no_rejudge_on_disagree) and DISAGREE:
@@ -3567,7 +3567,7 @@ def main():
 
                     CONS_THR = float(getattr(args, "self_cons_thr", 0.70))
 
-                    # 一致性：两次自评“标签相同”且“各自置信度均 ≥ τ_cons”
+                    # Consistency: The two self-assessments have the same label and their confidence levels are both ≥ τ_cons”
                     consistent = (
                         (lab2 == (label_llm or "")) and
                         ((conf_llm or 0.0) >= CONS_THR) and
@@ -3575,14 +3575,14 @@ def main():
                     )
 
                     if consistent:
-                        # 取较保守的置信度（两者较小值），避免抬得太高
+                        # Take a more conservative confidence level (the smaller one) to avoid raising it too high
                         label_llm_final, conf_llm_final = lab2, min(conf_llm or 0.0, conf2 or 0.0)
                     else:
-                        # 不一致或置信度不足：丢弃小裁判，交给规则为主的融合（自评记为 None）
+                        # Inconsistent or insufficient confidence: discard the small referee and hand it over to the rule-based fusion
                         label_llm_final, conf_llm_final = None, None
 
 
-                # 5) 无条件融合（不再放进上面的 if 块里）
+                # 5) Unconditional fusion (no longer put into the if block above)
                 final_label, needs_review, meta = fuse_labels(
                     label_rules=label_rules, E=E, R_known=R_known, R=R_val,
                     label_llm=label_llm_final, conf_llm=conf_llm_final,
@@ -3590,11 +3590,11 @@ def main():
                     thr_complete=args.fuse_thr_complete,
                     thr_full=args.fuse_thr_full,
                     conf_full_override=args.conf_full_override,
-                    sticky_complete=args.sticky_complete  # 默认就是 False，不会生效
+                    sticky_complete=args.sticky_complete  # Default is False
                 )
 
 
-                # 6) 输出 + 审计信息
+                # 6) Output + Audit Information
                 out = {
                     "idx": idx_num,
                     "category": category,
@@ -3630,7 +3630,7 @@ def main():
             # --- PATCH END ---
 
 
-            # 成功若干批后，尝试温和增大批大小，尽量吃满显存（带安全上限+滞回）
+            # After a few successful batches, try to gently increase the batch size to maximize the use of video memory (with a safety limit + hysteresis)
             if ok_streak >= GROW_AFTER_OK and B < B_init:
                 cap = SAFE_MAX_B if (SAFE_MAX_B is not None) else B_init
                 target = min(cap, B_init)
@@ -3663,9 +3663,6 @@ def main():
                 log_cuda_mem("oom_main_loop")
                 ok_streak = 0
 
-                # ==== 新增：更新安全上限（滞回）====
-                # 本次在 cur_B 发生 OOM，则以后把 SAFE_MAX_B 设为 cur_B - HYSTERESIS
-                # 避免再频繁上探到这个危险区间
                 new_cap = max(1, cur_B - HYSTERESIS)
                 SAFE_MAX_B = new_cap if (SAFE_MAX_B is None) else min(SAFE_MAX_B, new_cap)
                 B = min(B, SAFE_MAX_B)
@@ -3676,14 +3673,13 @@ def main():
                     new_B = max(1, cur_B // 2)
                     print(f"[OOM] Reduce batch size {cur_B} -> {new_B}; retrying at idx={idx}")
                     B = new_B
-                    continue  # 不推进 idx，重试
+                    continue  
                 else:
-                    # B==1 仍 OOM：降 token 预算兜底（见下一条“2)”）
                     if token_budget > MIN_TOKEN_BUDGET:
                         new_budget = max(MIN_TOKEN_BUDGET, int(token_budget * 0.8))
                         print(f"[OOM] B==1: reduce token budget {token_budget} -> {new_budget}; retry current idx")
                         token_budget = new_budget
-                        continue  # 不推进 idx，重试当前样本
+                        continue  
                     raise
             else:
                 raise

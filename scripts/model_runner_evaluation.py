@@ -82,8 +82,8 @@ def setup_env():
 
 
 # -------------------- Defaults --------------------
-DEFAULT_INPUT  = "/home/ubuntu/1500_English_prompt.jsonl"
-DEFAULT_OUTPUT = "glm3_results_English.jsonl"
+DEFAULT_INPUT  = "data/prompts/1500_English_prompt.jsonl"
+DEFAULT_OUTPUT = "data/results/glm3_results_English.jsonl"
 # Set to your local 8B instruct/chat model
 DEFAULT_MODEL  = "THUDM/chatglm3-6b"
 PRINT_EVERY    = 20

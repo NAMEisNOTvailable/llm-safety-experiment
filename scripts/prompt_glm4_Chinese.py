@@ -71,8 +71,8 @@ def log_cuda_mem(tag: str = "mem"):
         pass
 
 # -------------------- Defaults --------------------
-DEFAULT_INPUT  = "/home/ubuntu/1500_Chinese_prompt.jsonl"
-DEFAULT_OUTPUT = "glm4_results_Chinese.jsonl"
+DEFAULT_INPUT  = "data/prompts/1500_Chinese_prompt.jsonl"
+DEFAULT_OUTPUT = "data/results/glm4_results_Chinese.jsonl"
 # Set to your local 8B instruct/chat model
 DEFAULT_MODEL  = "ZhipuAI/glm-4-9b-chat"
 PRINT_EVERY    = 20

@@ -1,42 +1,72 @@
-# LLM Safety Experiment
+# LLM Safety Evaluation
 
-Evaluation scripts and experiment notes for Mandarin-English prompt-injection security research.
+Mandarin-English prompt-injection evaluation project for measuring how large language models respond to adversarial instructions across languages, attack goals, and delivery styles.
 
-This repository supports my Master of Cyber Security thesis work at the University of Adelaide: **A Coverage-Balanced Chinese Prompt-Injection Generator and Pipeline**. The project focuses on cross-lingual LLM security, Chinese prompt-injection behaviour, and reproducible evaluation design.
+This repository is a cleaned portfolio version of my Master of Cyber Security research work at the University of Adelaide. It focuses on reproducible LLM security evaluation rather than collecting isolated jailbreak examples.
 
-## Portfolio Summary
+## Project Snapshot
 
-- Built a Mandarin-English prompt-injection benchmark with **1,500 matched prompt pairs**.
-- Used a **5 x 5 goal-by-modality taxonomy** to compare model behaviour across attack goals and delivery styles.
-- Evaluated **ChatGLM3-6B**, **ChatGLM4-9B**, and **LLaMA-2-13B** through a unified inference and scoring workflow.
-- Applied a Gatekeeper-style evaluation scheme with **Complete Refusal**, **Partial Compliance**, and **Full Compliance** labels.
-- Designed the work around reproducibility, coverage balance, clear metrics, and risk-aware interpretation rather than ad hoc prompt examples.
+| Area | Summary |
+| --- | --- |
+| Research focus | Cross-lingual prompt-injection behaviour in Mandarin and English |
+| Dataset | 1,500 matched Mandarin-English prompt pairs |
+| Models evaluated | ChatGLM3-6B, ChatGLM4-9B, and LLaMA-2-13B |
+| Evaluation labels | Complete Refusal, Partial Compliance, Full Compliance |
+| Main output | Model response files and scoring workflow for comparative safety analysis |
 
-## Research Focus
+## What This Demonstrates
 
-The project investigates how Chinese and bilingual prompt-injection patterns affect model compliance and refusal behaviour. It is intended as a security evaluation workflow rather than a jailbreak collection.
+- Designed a coverage-balanced benchmark instead of relying on ad hoc attack prompts.
+- Compared refusal and compliance behaviour across Chinese, English, and bilingual attack styles.
+- Built Python scripts for repeatable model inference and response capture.
+- Organised model outputs so results can be reviewed, audited, and compared by language/model.
+- Framed results as security evaluation evidence, with attention to partial compliance and risk interpretation.
 
-Key questions:
+## Repository Structure
 
-- Do Mandarin and bilingual prompt-injection variants produce different refusal/compliance patterns?
-- Which attack goals and delivery modalities expose higher-risk behaviour?
-- How can prompt-injection experiments be made more reproducible and coverage-balanced?
-- How should evaluation labels distinguish partial compliance from full harmful compliance?
+```text
+data/
+  prompts/      Matched Mandarin-English benchmark prompt files
+  results/      Captured model output JSONL files
+scripts/        Model-running and evaluation scripts
+README.md       Project overview and reviewer guide
+```
 
-## Skills Demonstrated
+## Data Layout
 
-- AI safety and LLM security evaluation
-- Prompt-injection taxonomy design
-- Multilingual robustness analysis
-- Python-based experiment pipelines
-- Security-oriented model evaluation
-- Data cleaning, scoring, and reproducibility checks
-- Technical writing and research communication
+| Path | Purpose |
+| --- | --- |
+| `data/prompts/1500_Chinese_prompt.jsonl` | Mandarin prompt-injection benchmark set |
+| `data/prompts/1500_English_prompt.jsonl` | English matched benchmark set |
+| `data/results/*_results_Chinese.jsonl` | Chinese model responses |
+| `data/results/*_results_English.jsonl` | English model responses |
 
-## Related Work
+## Script Entry Points
+
+| Script | Purpose |
+| --- | --- |
+| `scripts/model_runner_evaluation.py` | General runner/evaluation workflow used for GLM3-style experiments |
+| `scripts/prompt_glm4_Chinese.py` | ChatGLM4 Chinese prompt evaluation |
+| `scripts/prompt_glm4_English.py` | ChatGLM4 English prompt evaluation |
+| `scripts/prompt_llama2_Chinese.py` | LLaMA-2 Chinese prompt evaluation |
+
+Run scripts from the repository root so default relative paths resolve correctly:
+
+```bash
+python scripts/model_runner_evaluation.py
+```
+
+## Research Questions
+
+- Do Mandarin prompt-injection variants produce different refusal/compliance patterns from English variants?
+- Which attack goals and delivery modalities expose higher-risk model behaviour?
+- How can LLM security experiments be made reproducible and coverage-balanced?
+- How should partial compliance be separated from full harmful compliance?
+
+## Related Project
 
 This repository complements [`llm-defend`](https://github.com/NAMEisNOTvailable/llm-defend), which contains a larger Chinese prompt-injection dataset composer and deterministic deduplication pipeline.
 
 ## Status
 
-Research portfolio project. The README is written for recruiters and reviewers who want a quick view of the project purpose, methods, and security relevance.
+Academic research portfolio project. The repository is organised for reviewers who want to inspect the benchmark files, model outputs, and evaluation workflow quickly.

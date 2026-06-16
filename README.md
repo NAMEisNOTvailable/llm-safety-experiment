@@ -67,6 +67,10 @@ python scripts/model_runner_evaluation.py
 
 This repository complements [`llm-defend`](https://github.com/NAMEisNOTvailable/llm-defend), which contains a larger Chinese prompt-injection dataset composer and deterministic deduplication pipeline.
 
+## License and Data
+
+Original source code and documentation are licensed under the MIT License. Benchmark prompts, model outputs, scoring artefacts, and other data files are not relicensed by this repository. See [Data Provenance](DATA_PROVENANCE.md) before reusing prompts, results, or model-output files.
+
 ## Status
 
 Academic research portfolio project. The repository is organised for reviewers who want to inspect the benchmark files, model outputs, and evaluation workflow quickly.

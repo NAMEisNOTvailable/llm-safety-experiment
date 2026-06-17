@@ -1,0 +1,49 @@
+name: Smoke tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run script smoke checks
+        run: |
+          python - <<'PY'
+          import compileall
+          import importlib.util
+          from pathlib import Path
+
+          scripts_dir = Path("scripts")
+          if not compileall.compile_dir(scripts_dir, quiet=1):
+              raise SystemExit("Python compile check failed for scripts/")
+
+          for script in sorted(scripts_dir.glob("*.py")):
+              spec = importlib.util.spec_from_file_location(script.stem, script)
+              module = importlib.util.module_from_spec(spec)
+              spec.loader.exec_module(module)
+
+          print("Script smoke checks passed.")
+          PY

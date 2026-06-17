@@ -50,6 +50,16 @@ README.md       Project overview and reviewer guide
 | `scripts/prompt_glm4_English.py` | ChatGLM4 English prompt evaluation |
 | `scripts/prompt_llama2_Chinese.py` | LLaMA-2 Chinese prompt evaluation |
 
+## Environment
+
+Recommended runtime: Python 3.10 with PyTorch, Transformers, Accelerate, Safetensors, SentencePiece, Protobuf, Einops, and TQDM. Install the base environment with:
+
+```bash
+pip install -r requirements.txt
+```
+
+Full model inference requires externally downloaded model weights and a CUDA-capable PyTorch installation sized for the selected model. Optional acceleration packages such as `bitsandbytes` or `flash-attn` can be installed separately when supported by the local GPU/Linux environment.
+
 Run scripts from the repository root so default relative paths resolve correctly:
 
 ```bash

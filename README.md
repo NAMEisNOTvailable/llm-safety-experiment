@@ -66,6 +66,16 @@ Run scripts from the repository root so default relative paths resolve correctly
 python scripts/model_runner_evaluation.py
 ```
 
+Model checkpoints and offload storage are configurable rather than tied to one experiment machine. Use `--model` for a Hugging Face model id or local checkpoint path, and `--offload-dir` for Hugging Face/Accelerate offload files:
+
+```bash
+python scripts/prompt_llama2_Chinese.py \
+  --model meta-llama/Llama-2-13b-chat-hf \
+  --offload-dir .cache/hf_offload
+```
+
+The same values can be supplied through `LLAMA2_MODEL` and `HF_OFFLOAD_DIR` when running repeated experiments.
+
 ## Research Questions
 
 - Do Mandarin prompt-injection variants produce different refusal/compliance patterns from English variants?

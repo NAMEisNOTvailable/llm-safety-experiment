@@ -92,6 +92,7 @@ MAX_NEW_TOKENS_MAIN = 256
 MAX_NEW_TOKENS_EVAL = 16   
 GPU_MAX_GIB    = "23GiB"   # keep headroom to avoid transient OOM
 CPU_MAX_GIB    = "100GiB"
+DEFAULT_OFFLOAD_DIR = os.getenv("HF_OFFLOAD_DIR", os.path.join(".cache", "hf_offload"))
 FUZZY_EN_FOLD_VOWELS = True
 SUPPORT_WINDOW = 32  # default; will be overwritten in main()
 
@@ -213,9 +214,11 @@ def parse_args():
     ap = argparse.ArgumentParser(description="Run LLAMA-2-13B chat model on JSONL prompts (8-bit, resume-safe).")
     ap.add_argument("--in",  dest="input_file",  default=DEFAULT_INPUT,  help="Path to input JSONL.")
     ap.add_argument("--out", dest="output_file", default=DEFAULT_OUTPUT, help="Path to output JSONL.")
-    ap.add_argument("--model", default=DEFAULT_MODEL, help="Local path to 13B 8-bit model.")
+    ap.add_argument("--model", default=DEFAULT_MODEL, help="Hugging Face model id or local checkpoint path.")
     ap.add_argument("--gpu-mem", default=GPU_MAX_GIB, help='Max GPU memory per device, e.g. "20GiB".')
     ap.add_argument("--cpu-mem", default=CPU_MAX_GIB, help='Max CPU memory for CPU offload, e.g. "96GiB".')
+    ap.add_argument("--offload-dir", default=DEFAULT_OFFLOAD_DIR,
+                    help="Directory for Hugging Face/Accelerate checkpoint offload. Defaults to HF_OFFLOAD_DIR or .cache/hf_offload.")
     ap.add_argument("--print-every", type=int, default=PRINT_EVERY, help="Progress print frequency.")
     ap.add_argument("--max-new-main", type=int, default=MAX_NEW_TOKENS_MAIN)
     ap.add_argument("--max-new-eval", type=int, default=MAX_NEW_TOKENS_EVAL)
@@ -743,7 +746,7 @@ def ensure_padding(tokenizer, model=None):
 
 
 # -------------------- Model loading & context helpers & warmup --------------------
-def load_model(model_path: str, gpu_mem: str, cpu_mem: str):
+def load_model(model_path: str, gpu_mem: str, cpu_mem: str, offload_dir: str):
     print("Loading model from:", model_path)
     low = str(model_path).lower()
     is_glm3 = ("chatglm3" in low) or ("glm3" in low) or ("thudm/chatglm3" in low)
@@ -838,8 +841,10 @@ def load_model(model_path: str, gpu_mem: str, cpu_mem: str):
     tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
     tokenizer.padding_side = "left"
 
-    # Configure offloading for large checkpoints (e.g., to NVMe).
-    os.makedirs("/mnt/nvme0/hf_offload", exist_ok=True)
+    # Configure offloading for large checkpoints without relying on machine-specific paths.
+    offload_dir = os.path.abspath(os.path.expanduser(offload_dir))
+    os.makedirs(offload_dir, exist_ok=True)
+    print("Using offload dir:", offload_dir)
     n_gpus = torch.cuda.device_count()
     max_mem = {i: gpu_mem for i in range(n_gpus)}
     max_mem["cpu"] = cpu_mem
@@ -860,7 +865,7 @@ def load_model(model_path: str, gpu_mem: str, cpu_mem: str):
                 max_memory=max_mem,
                 attn_implementation="flash_attention_2",
                 low_cpu_mem_usage=True,
-                offload_folder="/mnt/nvme0/hf_offload",
+                offload_folder=offload_dir,
                 offload_state_dict=True,
             )
         except TypeError:
@@ -884,7 +889,7 @@ def load_model(model_path: str, gpu_mem: str, cpu_mem: str):
             max_memory=max_mem,
             attn_implementation="sdpa",
             low_cpu_mem_usage=True,
-            offload_folder="/mnt/nvme0/hf_offload",
+            offload_folder=offload_dir,
             offload_state_dict=True,
         )
 
@@ -3434,7 +3439,7 @@ def main():
     torch.set_float32_matmul_precision("high")
 
     global G_TOK, G_MODEL, G_GEN_CFG, G_STATIC_BADS, G_JUDGE_CLS
-    tokenizer, model, gen_cfg, static_bads = load_model(args.model, args.gpu_mem, args.cpu_mem)
+    tokenizer, model, gen_cfg, static_bads = load_model(args.model, args.gpu_mem, args.cpu_mem, args.offload_dir)
     if args.warmup:
         warmup_generation(tokenizer, model, gen_cfg, static_bads,
                       zh_mode=args.zh_mode, zh_penalty=args.zh_penalty,

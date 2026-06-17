@@ -1,8 +1,16 @@
 # LLM Safety Evaluation
 
+[![Smoke tests](https://github.com/NAMEisNOTvailable/llm-safety-evaluation/actions/workflows/smoke.yml/badge.svg)](https://github.com/NAMEisNOTvailable/llm-safety-evaluation/actions/workflows/smoke.yml)
+
 Mandarin-English prompt-injection evaluation project for measuring how large language models respond to adversarial instructions across languages, attack goals, and delivery styles.
 
 This repository is a cleaned portfolio version of my Master of Cyber Security research work at the University of Adelaide. It focuses on reproducible LLM security evaluation rather than collecting isolated jailbreak examples.
+
+## Quick Review Path
+
+- **2 minutes:** read this README for the project scope, dataset layout, and reproduction requirements.
+- **5 minutes:** review [`docs/RESULTS_SUMMARY.md`](docs/RESULTS_SUMMARY.md) for model-by-language refusal/compliance counts and observations.
+- **10 minutes:** inspect [`DATA_PROVENANCE.md`](DATA_PROVENANCE.md), `data/prompts/`, `data/results/`, and `scripts/validate_dataset.py` to check data boundaries and validation coverage.
 
 ## Project Snapshot
 
@@ -28,6 +36,7 @@ This repository is a cleaned portfolio version of my Master of Cyber Security re
 data/
   prompts/      Matched Mandarin-English benchmark prompt files
   results/      Captured model output JSONL files
+docs/           Result summary and reviewer-facing notes
 scripts/        Model-running and evaluation scripts
 README.md       Project overview and reviewer guide
 ```
@@ -75,6 +84,62 @@ python scripts/prompt_llama2_Chinese.py \
 ```
 
 The same values can be supplied through `LLAMA2_MODEL` and `HF_OFFLOAD_DIR` when running repeated experiments.
+
+## Reproduction Commands
+
+The checked-in JSONL outputs were produced from the scripts below. Full model inference requires externally downloaded model weights, enough GPU memory for the selected model, and any model-specific access approval or local checkpoint mirror required by the model provider.
+
+```bash
+# ChatGLM3-6B on English prompts
+python scripts/model_runner_evaluation.py \
+  --in data/prompts/1500_English_prompt.jsonl \
+  --out data/results/glm3_results_English.jsonl \
+  --model THUDM/chatglm3-6b
+
+# ChatGLM3-6B on Mandarin prompts
+python scripts/model_runner_evaluation.py \
+  --in data/prompts/1500_Chinese_prompt.jsonl \
+  --out data/results/glm3_results_Chinese.jsonl \
+  --model THUDM/chatglm3-6b \
+  --zh-mode han_en \
+  --no-en-only-hard
+
+# ChatGLM4-9B on English prompts
+python scripts/prompt_glm4_English.py \
+  --in data/prompts/1500_English_prompt.jsonl \
+  --out data/results/glm4_results_English.jsonl \
+  --model ZhipuAI/glm-4-9b-chat
+
+# ChatGLM4-9B on Mandarin prompts
+python scripts/prompt_glm4_Chinese.py \
+  --in data/prompts/1500_Chinese_prompt.jsonl \
+  --out data/results/glm4_results_Chinese.jsonl \
+  --model ZhipuAI/glm-4-9b-chat \
+  --zh-mode han_en \
+  --no-en-only-hard
+
+# LLaMA-2-13B on English prompts
+python scripts/model_runner_evaluation.py \
+  --in data/prompts/1500_English_prompt.jsonl \
+  --out data/results/llama2_results_English.jsonl \
+  --model meta-llama/Llama-2-13b-chat-hf \
+  --offload-dir .cache/hf_offload
+
+# LLaMA-2-13B on Mandarin prompts
+python scripts/prompt_llama2_Chinese.py \
+  --in data/prompts/1500_Chinese_prompt.jsonl \
+  --out data/results/llama2_results_Chinese.jsonl \
+  --model meta-llama/Llama-2-13b-chat-hf \
+  --offload-dir .cache/hf_offload \
+  --zh-mode han_en \
+  --no-en-only-hard
+```
+
+To validate the checked-in artefacts without loading model weights, run:
+
+```bash
+python scripts/validate_dataset.py
+```
 
 ## Research Questions
 

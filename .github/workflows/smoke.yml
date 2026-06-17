@@ -47,3 +47,6 @@ jobs:
 
           print("Script smoke checks passed.")
           PY
+
+      - name: Validate dataset artefacts
+        run: python scripts/validate_dataset.py

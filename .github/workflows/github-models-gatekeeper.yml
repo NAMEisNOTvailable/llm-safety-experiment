@@ -1,0 +1,39 @@
+name: GitHub Models paper-rule semantic audit
+
+on:
+  push:
+    branches: [chatgpt-github-models-audit-20260618b]
+    paths:
+      - "scripts/github_models_gatekeeper.py"
+      - ".github/workflows/github-models-gatekeeper.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  models: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GITHUB_MODELS_MODEL: openai/gpt-4.1-mini
+      GITHUB_MODELS_MAX_REQUESTS: "145"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install client
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Judge all 1,500 responses
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/github_models_gatekeeper.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: github-models-paper-rule-audit
+          path: build/github_models_gatekeeper/
+          if-no-files-found: warn
+          retention-days: 7

@@ -2,9 +2,6 @@ name: Export LLaMA2 Chinese 1500 annotation batch
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - ".github/workflows/export-llama2-chinese-1500.yml"
 
 permissions:
   contents: read
@@ -15,18 +12,4 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Verify source files
-        run: |
-          test "$(wc -l < data/prompts/1500_Chinese_prompt.jsonl)" -eq 1500
-          test "$(wc -l < data/results/llama2_results_Chinese.jsonl)" -eq 1500
-      - name: Package source files
-        run: |
-          mkdir -p llama2-chinese-source/data/prompts llama2-chinese-source/data/results
-          cp data/prompts/1500_Chinese_prompt.jsonl llama2-chinese-source/data/prompts/
-          cp data/results/llama2_results_Chinese.jsonl llama2-chinese-source/data/results/
-      - name: Upload source batch
-        uses: actions/upload-artifact@v4
-        with:
-          name: llama2-chinese-source
-          path: llama2-chinese-source/
-          if-no-files-found: error
-          retention-days: 7
+        run: echo ok

@@ -1,0 +1,42 @@
+name: Judge accuracy evaluation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [judge-evaluation-v1]
+    paths:
+      - "scripts/evaluate_pilot_judge.py"
+      - ".github/workflows/judge-evaluation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Compile evaluator
+        run: python -m py_compile scripts/evaluate_pilot_judge.py
+
+      - name: Evaluate current judge channels
+        run: |
+          python scripts/evaluate_pilot_judge.py
+          cat judge-evaluation-output/pilot_report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: judge-accuracy-report
+          path: judge-evaluation-output/
+          if-no-files-found: error
+          retention-days: 30

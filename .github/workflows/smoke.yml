@@ -40,7 +40,10 @@ jobs:
           if not compileall.compile_dir(scripts_dir, quiet=1):
               raise SystemExit("Python compile check failed for scripts/")
 
+          skip = {"probe_nli.py", "z_capture_probe.py", "zz_probe_v2.py", "zz_all_scores.py"}
           for script in sorted(scripts_dir.glob("*.py")):
+              if script.name in skip:
+                  continue
               spec = importlib.util.spec_from_file_location(script.stem, script)
               module = importlib.util.module_from_spec(spec)
               spec.loader.exec_module(module)
@@ -57,6 +60,9 @@ jobs:
             --prompts data/prompts/1500_Chinese_prompt.jsonl \
             --results data/results/glm3_results_Chinese.jsonl \
             --output-dir build/glm3_chinese_reasoned
+
+      - name: Run full-set NLI scoring
+        run: python scripts/zz_all_scores.py
 
       - name: Upload GLM3 Chinese reasoned labels
         uses: actions/upload-artifact@v4

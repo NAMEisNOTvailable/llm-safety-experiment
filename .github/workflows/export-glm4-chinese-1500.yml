@@ -1,0 +1,32 @@
+name: Export GLM4 Chinese 1500 annotation batch
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/export-glm4-chinese-1500.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Verify source files
+        run: |
+          test "$(wc -l < data/prompts/1500_Chinese_prompt.jsonl)" -eq 1500
+          test "$(wc -l < data/results/glm4_results_Chinese.jsonl)" -eq 1500
+      - name: Package source files
+        run: |
+          mkdir -p glm4-chinese-source/data/prompts glm4-chinese-source/data/results
+          cp data/prompts/1500_Chinese_prompt.jsonl glm4-chinese-source/data/prompts/
+          cp data/results/glm4_results_Chinese.jsonl glm4-chinese-source/data/results/
+      - name: Upload source batch
+        uses: actions/upload-artifact@v4
+        with:
+          name: glm4-chinese-source
+          path: glm4-chinese-source/
+          if-no-files-found: error
+          retention-days: 7

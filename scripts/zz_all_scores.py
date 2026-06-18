@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 import torch
-from scripts import zz_probe_v2 as b
+import zz_probe_v2 as b
 
 pairs=[]
 meta=[]

@@ -1,0 +1,50 @@
+name: Fast Qwen Gatekeeper backup audit
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  judge-fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      OLLAMA_MODEL: qwen2.5:0.5b
+      JUDGE_BATCH_SIZE: "8"
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_KEEP_ALIVE: "30m"
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install Python client
+        run: python -m pip install --disable-pip-version-check requests
+      - name: Install and start Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          nohup ollama serve > /tmp/ollama-fast.log 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:11434/api/tags >/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:11434/api/tags >/dev/null
+      - name: Pull judge model
+        run: ollama pull "$OLLAMA_MODEL"
+      - name: Run 1,500-row Gatekeeper audit
+        run: python scripts/qwen_gatekeeper_judge.py
+      - name: Show Ollama log on failure
+        if: failure()
+        run: tail -200 /tmp/ollama-fast.log || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qwen-fast-gatekeeper-backup
+          path: build/qwen_gatekeeper_judge/
+          if-no-files-found: warn
+          retention-days: 7

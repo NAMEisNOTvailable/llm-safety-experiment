@@ -6,6 +6,9 @@ on:
     branches: [annotation-first-1500]
     paths:
       - ".github/workflows/export-first-1500.yml"
+  pull_request:
+    paths:
+      - ".github/workflows/export-first-1500.yml"
 
 permissions:
   contents: read

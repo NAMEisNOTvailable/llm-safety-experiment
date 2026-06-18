@@ -25,8 +25,8 @@ This repository is a cleaned portfolio edition of a Mandarin-English LLM safety 
 
 ## Responsible-Use Note
 
-The benchmark and result files contain adversarial prompts, unsafe scenarios, and model responses to those prompts. They are included only for defensive LLM security evaluation, reproducibility review, and academic portfolio inspection. They should not be treated as endorsement, operational guidance, or a prompt library for misuse.
+The benchmark and result files contain adversarial prompts, unsafe scenarios, and model responses to those prompts. They are included for defensive LLM security evaluation, reproducibility review, and academic portfolio inspection.
 
-## Reviewer Guidance
+## Reuse Guidance
 
-For portfolio review, inspect the benchmark structure, model-output organisation, scoring fields, and script workflow. For reuse outside review, cite the project, comply with relevant prompt/data/model terms, and keep any derived analysis clearly attributed.
+For portfolio inspection, review the benchmark structure, model-output organisation, scoring fields, and script workflow. For reuse outside portfolio review, cite the project, comply with relevant prompt/data/model terms, and keep any derived analysis clearly attributed.

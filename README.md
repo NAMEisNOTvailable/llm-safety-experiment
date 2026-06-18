@@ -4,9 +4,9 @@
 
 Mandarin-English prompt-injection evaluation project for measuring how large language models respond to adversarial instructions across languages, attack goals, and delivery styles.
 
-This repository is a cleaned portfolio version of my Master of Cyber Security research work at the University of Adelaide. It focuses on reproducible LLM security evaluation rather than collecting isolated jailbreak examples.
+This repository is a cleaned portfolio version of my Master of Cyber Security research work at the University of Adelaide. It focuses on reproducible LLM security evaluation with coverage-balanced prompt-injection inputs.
 
-## Quick Review Path
+## Inspection Path
 
 - **2 minutes:** read this README for the project scope, dataset layout, and reproduction requirements.
 - **5 minutes:** review [`docs/RESULTS_SUMMARY.md`](docs/RESULTS_SUMMARY.md) for model-by-language refusal/compliance counts and observations.
@@ -36,9 +36,9 @@ This repository is a cleaned portfolio version of my Master of Cyber Security re
 data/
   prompts/      Matched Mandarin-English benchmark prompt files
   results/      Captured model output JSONL files
-docs/           Result summary and reviewer-facing notes
+docs/           Result summary and project notes
 scripts/        Model-running and evaluation scripts
-README.md       Project overview and reviewer guide
+README.md       Project overview and inspection guide
 ```
 
 ## Data Layout
@@ -75,7 +75,7 @@ Run scripts from the repository root so default relative paths resolve correctly
 python scripts/model_runner_evaluation.py
 ```
 
-Model checkpoints and offload storage are configurable rather than tied to one experiment machine. Use `--model` for a Hugging Face model id or local checkpoint path, and `--offload-dir` for Hugging Face/Accelerate offload files:
+Model checkpoints and offload storage are configurable across experiment machines. Use `--model` for a Hugging Face model id or local checkpoint path, and `--offload-dir` for Hugging Face/Accelerate offload files:
 
 ```bash
 python scripts/prompt_llama2_Chinese.py \
@@ -158,4 +158,4 @@ Original source code and documentation are licensed under the MIT License. Bench
 
 ## Status
 
-Academic research portfolio project. The repository is organised for reviewers who want to inspect the benchmark files, model outputs, and evaluation workflow quickly.
+Academic research portfolio project. The repository is organised for quick inspection of benchmark files, model outputs, and the evaluation workflow.

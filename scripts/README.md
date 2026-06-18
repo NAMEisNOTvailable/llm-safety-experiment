@@ -15,4 +15,4 @@ Model paths and offload storage are configurable:
 - `LLAMA2_MODEL` can override the default LLaMA-2 model id for `prompt_llama2_Chinese.py`.
 - `HF_OFFLOAD_DIR` can override the default `.cache/hf_offload` directory.
 
-The scripts are preserved as research artefacts for reviewers who want to inspect the inference and scoring workflow.
+The scripts are preserved as research artefacts for inspecting the inference and scoring workflow.

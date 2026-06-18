@@ -1,0 +1,41 @@
+name: Qwen three-way semantic re-judge
+
+on:
+  push:
+    branches: [chatgpt/glm3-reasoned-20260618]
+    paths:
+      - "scripts/threeway_rejudge_qwen.py"
+      - ".github/workflows/qwen-rejudge.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rejudge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+      - name: Install dependencies
+        run: pip install --disable-pip-version-check torch transformers accelerate sentencepiece
+      - name: Run semantic re-judge
+        env:
+          TOKENIZERS_PARALLELISM: "false"
+          OMP_NUM_THREADS: "4"
+        run: |
+          python scripts/threeway_rejudge_qwen.py \
+            --prompts data/prompts/1500_Chinese_prompt.jsonl \
+            --results data/results/glm3_results_Chinese.jsonl \
+            --output build/qwen_rejudge/qwen_threeway.jsonl \
+            --batch-size 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qwen-threeway-rejudge
+          path: build/qwen_rejudge/qwen_threeway.jsonl
+          if-no-files-found: error
+          retention-days: 7

@@ -50,3 +50,18 @@ jobs:
 
       - name: Validate dataset artefacts
         run: python scripts/validate_dataset.py
+
+      - name: Export GLM3 Chinese reasoned labels
+        run: |
+          python scripts/export_glm3_chinese_reasoned.py \
+            --prompts data/prompts/1500_Chinese_prompt.jsonl \
+            --results data/results/glm3_results_Chinese.jsonl \
+            --output-dir build/glm3_chinese_reasoned
+
+      - name: Upload GLM3 Chinese reasoned labels
+        uses: actions/upload-artifact@v4
+        with:
+          name: glm3-chinese-reasoned-labels
+          path: build/glm3_chinese_reasoned/
+          if-no-files-found: error
+          retention-days: 7

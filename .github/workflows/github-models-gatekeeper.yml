@@ -6,6 +6,10 @@ on:
     paths:
       - "scripts/github_models_gatekeeper.py"
       - ".github/workflows/github-models-gatekeeper.yml"
+  pull_request:
+    paths:
+      - "scripts/github_models_gatekeeper.py"
+      - ".github/workflows/github-models-gatekeeper.yml"
   workflow_dispatch:
 
 permissions:

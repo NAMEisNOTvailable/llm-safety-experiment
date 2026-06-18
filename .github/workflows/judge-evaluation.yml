@@ -7,6 +7,10 @@ on:
     paths:
       - "scripts/evaluate_pilot_judge.py"
       - ".github/workflows/judge-evaluation.yml"
+  pull_request:
+    paths:
+      - "scripts/evaluate_pilot_judge.py"
+      - ".github/workflows/judge-evaluation.yml"
 
 permissions:
   contents: read

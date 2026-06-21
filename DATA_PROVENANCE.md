@@ -1,6 +1,6 @@
 # Data Provenance
 
-This repository is a cleaned portfolio edition of a Mandarin-English LLM safety evaluation project. The MIT license in `LICENSE` applies to the original source code and documentation. It does not relicense benchmark prompts, model outputs, scoring artefacts, or any upstream model- or dataset-derived material.
+This repository documents a Mandarin-English LLM safety evaluation project. The MIT license in `LICENSE` applies to the original source code and documentation. It does not relicense benchmark prompts, model outputs, scoring artefacts, or any upstream model- or dataset-derived material.
 
 ## Licensing Boundary
 
@@ -25,8 +25,8 @@ This repository is a cleaned portfolio edition of a Mandarin-English LLM safety 
 
 ## Responsible-Use Note
 
-The benchmark and result files contain adversarial prompts, unsafe scenarios, and model responses to those prompts. They are included for defensive LLM security evaluation, reproducibility review, and academic portfolio inspection.
+The benchmark and result files contain adversarial prompts, unsafe scenarios, and model responses to those prompts. They are included for defensive LLM security evaluation, reproducibility review, and academic research inspection.
 
 ## Reuse Guidance
 
-For portfolio inspection, review the benchmark structure, model-output organisation, scoring fields, and script workflow. For reuse outside portfolio review, cite the project, comply with relevant prompt/data/model terms, and keep any derived analysis clearly attributed.
+For project inspection, review the benchmark structure, model-output organisation, scoring fields, and script workflow. For reuse outside review, cite the project, comply with relevant prompt/data/model terms, and keep any derived analysis clearly attributed.

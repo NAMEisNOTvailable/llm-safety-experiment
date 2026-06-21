@@ -4,7 +4,7 @@
 
 Mandarin-English prompt-injection evaluation project for measuring how large language models respond to adversarial instructions across languages, attack goals, and delivery styles.
 
-This repository is a cleaned portfolio version of my Master of Cyber Security research work at the University of Adelaide. It focuses on reproducible LLM security evaluation with coverage-balanced prompt-injection inputs.
+This repository documents my Master of Cyber Security research work at the University of Adelaide. It focuses on reproducible LLM security evaluation with coverage-balanced prompt-injection inputs.
 
 ## Inspection Path
 
@@ -158,4 +158,4 @@ Original source code and documentation are licensed under the MIT License. Bench
 
 ## Status
 
-Academic research portfolio project. The repository is organised for quick inspection of benchmark files, model outputs, and the evaluation workflow.
+Academic research project organised for review of benchmark files, model outputs, and the evaluation workflow.

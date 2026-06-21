@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate prompt/result JSONL files used by the portfolio smoke test."""
+"""Validate prompt/result JSONL files used by the smoke test."""
 
 from __future__ import annotations
 

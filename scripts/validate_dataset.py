@@ -11,6 +11,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_ROWS = 1500
+LABEL_VERSION = "2026-06-22"
 PROMPT_FILES = {
     "Chinese": ROOT / "data" / "prompts" / "1500_Chinese_prompt.jsonl",
     "English": ROOT / "data" / "prompts" / "1500_English_prompt.jsonl",
@@ -21,12 +22,21 @@ RESULT_FILES = {
     "glm4_results_Chinese.jsonl": "Chinese",
     "glm4_results_English.jsonl": "English",
     "llama2_results_Chinese.jsonl": "Chinese",
-    "llama2_results_Chinese_merged.jsonl": "Chinese",
     "llama2_results_English.jsonl": "English",
 }
-LABELS = {"Complete refusal", "Partial compliance", "Full compliance"}
+LABEL_ORDER = ("Complete refusal", "Partial compliance", "Full compliance")
+LABELS = set(LABEL_ORDER)
 PROMPT_KEYS = {"prompt", "evaluation", "attack", "goal", "category", "idx"}
-RESULT_KEYS = {"idx", "category", "model_answer", "evaluation_raw", "evaluation_result", "meta"}
+RESULT_KEYS = {
+    "idx",
+    "category",
+    "model_answer",
+    "evaluation_raw",
+    "evaluation_result_gatekeeper_v2",
+    "evaluation_result",
+    "adjudication_reason",
+    "meta",
+}
 
 
 class ValidationError(Exception):
@@ -119,17 +129,58 @@ def validate_result_file(path: Path, expected_idx: set[int]) -> None:
             f"{path.relative_to(ROOT)} idx coverage mismatch: missing={len(missing)} extra={len(extra)}"
         )
 
-    labels = Counter()
+    final_labels = Counter()
+    gatekeeper_labels = Counter()
+    changed_labels = 0
     for index, row in enumerate(rows, 1):
+        if "prompt" in row:
+            raise ValidationError(f"{path.relative_to(ROOT)} row {index} should not duplicate prompt text")
+
+        gatekeeper_label = row.get("evaluation_result_gatekeeper_v2")
+        if gatekeeper_label not in LABELS:
+            raise ValidationError(
+                f"{path.relative_to(ROOT)} row {index} invalid Gatekeeper label: {gatekeeper_label!r}"
+            )
+
         label = row.get("evaluation_result")
         if label not in LABELS:
-            raise ValidationError(f"{path.relative_to(ROOT)} row {index} invalid label: {label!r}")
-        if not isinstance(row.get("meta"), dict):
-            raise ValidationError(f"{path.relative_to(ROOT)} row {index} has invalid meta")
-        labels[label] += 1
+            raise ValidationError(f"{path.relative_to(ROOT)} row {index} invalid final label: {label!r}")
 
-    label_summary = ", ".join(f"{label}={labels[label]}" for label in sorted(LABELS))
-    print(f"{path.relative_to(ROOT)}: {len(rows)} rows, {label_summary}")
+        reason = row.get("adjudication_reason")
+        if not isinstance(reason, str) or not reason.strip():
+            raise ValidationError(
+                f"{path.relative_to(ROOT)} row {index} has invalid adjudication_reason"
+            )
+
+        meta = row.get("meta")
+        if not isinstance(meta, dict):
+            raise ValidationError(f"{path.relative_to(ROOT)} row {index} has invalid meta")
+        if meta.get("label_source") != "human_review":
+            raise ValidationError(
+                f"{path.relative_to(ROOT)} row {index} invalid meta.label_source: "
+                f"{meta.get('label_source')!r}"
+            )
+        if meta.get("label_version") != LABEL_VERSION:
+            raise ValidationError(
+                f"{path.relative_to(ROOT)} row {index} invalid meta.label_version: "
+                f"{meta.get('label_version')!r}"
+            )
+
+        final_labels[label] += 1
+        gatekeeper_labels[gatekeeper_label] += 1
+        if label != gatekeeper_label:
+            changed_labels += 1
+
+    label_summary = ", ".join(f"{label}={final_labels[label]}" for label in LABEL_ORDER)
+    gatekeeper_summary = ", ".join(
+        f"{label}={gatekeeper_labels[label]}" for label in LABEL_ORDER
+    )
+    print(
+        f"{path.relative_to(ROOT)}: {len(rows)} rows, "
+        f"final labels: {label_summary}; "
+        f"Gatekeeper labels: {gatekeeper_summary}; "
+        f"changed={changed_labels}"
+    )
 
 
 def main() -> None:

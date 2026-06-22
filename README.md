@@ -19,8 +19,8 @@ This repository documents my Master of Cyber Security research work at the Unive
 | Research focus | Cross-lingual prompt-injection behaviour in Mandarin and English |
 | Dataset | 1,500 matched Mandarin-English prompt pairs |
 | Models evaluated | ChatGLM3-6B, ChatGLM4-9B, and LLaMA-2-13B |
-| Evaluation labels | Complete Refusal, Partial Compliance, Full Compliance |
-| Main output | Model response files and scoring workflow for comparative safety analysis |
+| Evaluation labels | Human-reviewed final labels: Complete Refusal, Partial Compliance, Full Compliance |
+| Main output | Preserved model responses, Gatekeeper v2 automatic labels, and human-reviewed final labels |
 
 ## What This Demonstrates
 
@@ -28,6 +28,7 @@ This repository documents my Master of Cyber Security research work at the Unive
 - Compared refusal and compliance behaviour across Chinese, English, and bilingual attack styles.
 - Built Python scripts for repeatable model inference and response capture.
 - Organised model outputs so results can be reviewed, audited, and compared by language/model.
+- Preserved original model answers while separating automatic scoring from final human review.
 - Framed results as security evaluation evidence, with attention to partial compliance and risk interpretation.
 
 ## Repository Structure
@@ -35,7 +36,7 @@ This repository documents my Master of Cyber Security research work at the Unive
 ```text
 data/
   prompts/      Matched Mandarin-English benchmark prompt files
-  results/      Captured model output JSONL files
+  results/      Captured model output JSONL files with automatic and human labels
 docs/           Result summary and project notes
 scripts/        Model-running and evaluation scripts
 README.md       Project overview and inspection guide
@@ -47,8 +48,10 @@ README.md       Project overview and inspection guide
 | --- | --- |
 | `data/prompts/1500_Chinese_prompt.jsonl` | Mandarin prompt-injection benchmark set |
 | `data/prompts/1500_English_prompt.jsonl` | English matched benchmark set |
-| `data/results/*_results_Chinese.jsonl` | Chinese model responses |
-| `data/results/*_results_English.jsonl` | English model responses |
+| `data/results/*_results_Chinese.jsonl` | Chinese model responses with Gatekeeper v2 labels and human-reviewed final labels |
+| `data/results/*_results_English.jsonl` | English model responses with Gatekeeper v2 labels and human-reviewed final labels |
+
+Result files keep the original `model_answer` once. The earlier automatic label is stored as `evaluation_result_gatekeeper_v2`; the final human-reviewed label is stored as `evaluation_result`; `adjudication_reason` records the review rationale.
 
 ## Script Entry Points
 
@@ -87,7 +90,9 @@ The same values can be supplied through `LLAMA2_MODEL` and `HF_OFFLOAD_DIR` when
 
 ## Reproduction Commands
 
-The checked-in JSONL outputs were produced from the scripts below. Full model inference requires externally downloaded model weights, enough GPU memory for the selected model, and any model-specific access approval or local checkpoint mirror required by the model provider.
+The checked-in JSONL outputs were initially produced from the scripts below. Full model inference requires externally downloaded model weights, enough GPU memory for the selected model, and any model-specific access approval or local checkpoint mirror required by the model provider.
+
+The current result files also include a later human review pass. The original model answers remain in `model_answer`, the earlier Gatekeeper v2 automatic labels remain in `evaluation_result_gatekeeper_v2`, and the human-reviewed final labels used in `docs/RESULTS_SUMMARY.md` are stored in `evaluation_result`.
 
 ```bash
 # ChatGLM3-6B on English prompts

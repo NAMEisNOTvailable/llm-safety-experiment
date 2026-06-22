@@ -1,13 +1,32 @@
 # Data Provenance
 
-This repository documents a Mandarin-English LLM safety evaluation project. The MIT license in `LICENSE` applies to the original source code and documentation. It does not relicense benchmark prompts, model outputs, scoring artefacts, or any upstream model- or dataset-derived material.
+This repository documents a Mandarin-English LLM safety evaluation project. The MIT license in `LICENSE` applies to the original source code and documentation. It does not relicense benchmark prompts, model outputs, scoring artefacts, human-review labels, or any upstream model- or dataset-derived material.
 
 ## Licensing Boundary
 
 - Original source code and documentation: MIT license, see `LICENSE`.
 - Benchmark prompts in `data/prompts/`: research benchmark material; not relicensed by the MIT code license.
 - Captured model outputs in `data/results/`: generated evaluation artefacts; reuse may also depend on the relevant model license and acceptable-use terms.
-- If a prompt or output source is unclear, treat the file as research-review material only and verify source terms before reuse or redistribution.
+- Gatekeeper v2 automatic labels in `evaluation_result_gatekeeper_v2`: retained as scoring metadata and audit history, not final ground truth.
+- Human-reviewed final labels in `evaluation_result`: adjudicated research labels for the checked-in result files, with rationale in `adjudication_reason`.
+- If a prompt, output, or label source is unclear, treat the file as research-review material only and verify source terms before reuse or redistribution.
+
+## Result File Schema
+
+The six checked-in result files preserve the original answer and separate automatic scoring from final human adjudication:
+
+| Field | Meaning |
+| --- | --- |
+| `idx` | Prompt/result identifier aligned with the prompt files |
+| `model_answer` | Original captured model response |
+| `evaluation_raw` | Scoring prompt or raw evaluation instruction used by the automated scorer |
+| `evaluation_result_gatekeeper_v2` | Earlier Gatekeeper v2 automatic scoring label |
+| `evaluation_result` | Human-reviewed final label used for current statistics |
+| `adjudication_reason` | Human-review rationale for the final label |
+| `meta.label_source` | Label source for the current final label; expected value is `human_review` |
+| `meta.label_version` | Human-review label version; current value is `2026-06-22` |
+
+The result files do not duplicate prompt text. Prompts remain in `data/prompts/` and can be joined to results by `idx`.
 
 ## Data Inventory
 
@@ -15,13 +34,12 @@ This repository documents a Mandarin-English LLM safety evaluation project. The 
 | --- | --- | --- |
 | `data/prompts/1500_Chinese_prompt.jsonl` | Mandarin prompt-injection benchmark prompts used for model evaluation. | Benchmark material; not covered by the MIT code license. |
 | `data/prompts/1500_English_prompt.jsonl` | Matched English prompt-injection benchmark prompts used for model evaluation. | Benchmark material; not covered by the MIT code license. |
-| `data/results/glm3_results_Chinese.jsonl` | Captured ChatGLM3 Chinese responses and scoring metadata. | Generated evaluation artefact; check upstream model terms before reuse. |
-| `data/results/glm3_results_English.jsonl` | Captured ChatGLM3 English responses and scoring metadata. | Generated evaluation artefact; check upstream model terms before reuse. |
-| `data/results/glm4_results_Chinese.jsonl` | Captured ChatGLM4 Chinese responses and scoring metadata. | Generated evaluation artefact; check upstream model terms before reuse. |
-| `data/results/glm4_results_English.jsonl` | Captured ChatGLM4 English responses and scoring metadata. | Generated evaluation artefact; check upstream model terms before reuse. |
-| `data/results/llama2_results_Chinese.jsonl` | Captured LLaMA-2 Chinese responses and scoring metadata. | Generated evaluation artefact; check upstream model terms before reuse. |
-| `data/results/llama2_results_Chinese_merged.jsonl` | Merged Chinese LLaMA-2 evaluation output. | Generated evaluation artefact; check upstream model terms before reuse. |
-| `data/results/llama2_results_English.jsonl` | Captured LLaMA-2 English responses and scoring metadata. | Generated evaluation artefact; check upstream model terms before reuse. |
+| `data/results/glm3_results_Chinese.jsonl` | Captured ChatGLM3 Chinese responses, Gatekeeper v2 labels, and human-reviewed final labels. | Generated evaluation artefact; check upstream model terms before reuse. |
+| `data/results/glm3_results_English.jsonl` | Captured ChatGLM3 English responses, Gatekeeper v2 labels, and human-reviewed final labels. | Generated evaluation artefact; check upstream model terms before reuse. |
+| `data/results/glm4_results_Chinese.jsonl` | Captured ChatGLM4 Chinese responses, Gatekeeper v2 labels, and human-reviewed final labels. | Generated evaluation artefact; check upstream model terms before reuse. |
+| `data/results/glm4_results_English.jsonl` | Captured ChatGLM4 English responses, Gatekeeper v2 labels, and human-reviewed final labels. | Generated evaluation artefact; check upstream model terms before reuse. |
+| `data/results/llama2_results_Chinese.jsonl` | Captured LLaMA-2 Chinese responses, Gatekeeper v2 labels, and human-reviewed final labels. | Generated evaluation artefact; check upstream model terms before reuse. |
+| `data/results/llama2_results_English.jsonl` | Captured LLaMA-2 English responses, Gatekeeper v2 labels, and human-reviewed final labels. | Generated evaluation artefact; check upstream model terms before reuse. |
 
 ## Responsible-Use Note
 
@@ -29,4 +47,4 @@ The benchmark and result files contain adversarial prompts, unsafe scenarios, an
 
 ## Reuse Guidance
 
-For project inspection, review the benchmark structure, model-output organisation, scoring fields, and script workflow. For reuse outside review, cite the project, comply with relevant prompt/data/model terms, and keep any derived analysis clearly attributed.
+For project inspection, review the benchmark structure, model-output organisation, scoring fields, adjudication fields, and script workflow. For reuse outside review, cite the project, comply with relevant prompt/data/model terms, and keep any derived analysis clearly attributed.

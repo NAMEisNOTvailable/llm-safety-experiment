@@ -11,4 +11,6 @@ The files are kept in JSONL format so each prompt or response can be inspected, 
 
 Result files do not duplicate prompt text. Join prompts and results by `idx` when prompt text is needed for analysis.
 
+Local reruns should write raw model outputs to `../build/raw_results/` first. The checked-in `results/` files should be regenerated through `../scripts/merge_human_review_labels.py` after human review, rather than overwritten directly by inference scripts.
+
 These prompt and result files are research artefacts and are not covered by the repository's MIT code license. See [`../DATA_PROVENANCE.md`](../DATA_PROVENANCE.md) for source, model-output, and reuse notes.

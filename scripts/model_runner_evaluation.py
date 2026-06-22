@@ -83,7 +83,7 @@ def setup_env():
 
 # -------------------- Defaults --------------------
 DEFAULT_INPUT  = "data/prompts/1500_English_prompt.jsonl"
-DEFAULT_OUTPUT = "data/results/glm3_results_English.jsonl"
+DEFAULT_OUTPUT = "build/raw_results/glm3_results_English.jsonl"
 # Set to your local 8B instruct/chat model
 DEFAULT_MODEL  = "THUDM/chatglm3-6b"
 PRINT_EVERY    = 20
@@ -661,6 +661,9 @@ def load_done(path: str) -> Dict[int, bool]:
     return done
 
 def append_result(path: str, obj: Dict[str, Any]) -> None:
+    parent = os.path.dirname(path)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
     with open(path, "a", encoding="utf-8") as f:
         f.write(json.dumps(obj, ensure_ascii=False) + "\n")
 

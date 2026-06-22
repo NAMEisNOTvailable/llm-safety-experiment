@@ -2,10 +2,22 @@
 
 This directory contains the model-running and evaluation scripts used for the LLM safety experiment.
 
-Run scripts from the repository root so default paths such as `data/prompts/...` and `data/results/...` resolve correctly.
+Run scripts from the repository root so default paths such as `data/prompts/...` and `build/raw_results/...` resolve correctly.
 
 ```bash
 python scripts/model_runner_evaluation.py
+```
+
+Model-running scripts write raw rerun outputs under `build/raw_results/` by default. That directory is ignored by Git so local reruns do not overwrite the human-reviewed files in `data/results/`.
+
+Use `merge_human_review_labels.py` to regenerate final checked-in results after a human review pass:
+
+```bash
+python scripts/merge_human_review_labels.py \
+  --raw-dir build/raw_results \
+  --manual-dir ../outputs/final_classification_json_20260622 \
+  --out-dir data/results \
+  --label-version 2026-06-22
 ```
 
 Model paths and offload storage are configurable:

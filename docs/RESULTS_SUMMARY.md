@@ -4,7 +4,7 @@ This summary turns the stored JSONL outputs into a compact view of cross-lingual
 
 Each result row preserves three separate layers:
 
-- `model_answer`: the original captured model output.
+- `model_answer`: the captured model output after the reviewed dataset correction pass.
 - `evaluation_result_gatekeeper_v2`: the earlier Gatekeeper v2 automatic scoring label.
 - `evaluation_result`: the human-reviewed final label used for the statistics in this file.
 
@@ -18,12 +18,12 @@ The repository uses three labels:
 
 | Model | Language | Samples | Complete refusal | Partial compliance | Full compliance | Partial + Full |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| ChatGLM3-6B | Chinese | 1,500 | 258 (17.2%) | 255 (17.0%) | 987 (65.8%) | 1,242 (82.8%) |
-| ChatGLM3-6B | English | 1,500 | 351 (23.4%) | 243 (16.2%) | 906 (60.4%) | 1,149 (76.6%) |
-| ChatGLM4-9B | Chinese | 1,500 | 396 (26.4%) | 332 (22.1%) | 772 (51.5%) | 1,104 (73.6%) |
-| ChatGLM4-9B | English | 1,500 | 312 (20.8%) | 232 (15.5%) | 956 (63.7%) | 1,188 (79.2%) |
-| LLaMA-2-13B | Chinese | 1,500 | 566 (37.7%) | 189 (12.6%) | 745 (49.7%) | 934 (62.3%) |
-| LLaMA-2-13B | English | 1,500 | 831 (55.4%) | 100 (6.7%) | 569 (37.9%) | 669 (44.6%) |
+| ChatGLM3-6B | Chinese | 1,500 | 258 (17.2%) | 253 (16.9%) | 989 (65.9%) | 1,242 (82.8%) |
+| ChatGLM3-6B | English | 1,500 | 351 (23.4%) | 242 (16.1%) | 907 (60.5%) | 1,149 (76.6%) |
+| ChatGLM4-9B | Chinese | 1,500 | 396 (26.4%) | 330 (22.0%) | 774 (51.6%) | 1,104 (73.6%) |
+| ChatGLM4-9B | English | 1,500 | 312 (20.8%) | 230 (15.3%) | 958 (63.9%) | 1,188 (79.2%) |
+| LLaMA-2-13B | Chinese | 1,500 | 566 (37.7%) | 187 (12.5%) | 747 (49.8%) | 934 (62.3%) |
+| LLaMA-2-13B | English | 1,500 | 831 (55.4%) | 98 (6.5%) | 571 (38.1%) | 669 (44.6%) |
 
 `Partial + Full` is the attack-success signal used here because both labels indicate some level of compliance with unsafe or false-premise behaviour.
 
@@ -31,12 +31,12 @@ The repository uses three labels:
 
 | Model | Language | Gatekeeper v2 Partial + Full | Human final Partial + Full | Change | Rows with changed label |
 | --- | --- | ---: | ---: | ---: | ---: |
-| ChatGLM3-6B | Chinese | 534 (35.6%) | 1,242 (82.8%) | +47.2 pp | 923 |
-| ChatGLM3-6B | English | 542 (36.1%) | 1,149 (76.6%) | +40.5 pp | 872 |
-| ChatGLM4-9B | Chinese | 659 (43.9%) | 1,104 (73.6%) | +29.7 pp | 1,037 |
-| ChatGLM4-9B | English | 1,142 (76.1%) | 1,188 (79.2%) | +3.1 pp | 785 |
-| LLaMA-2-13B | Chinese | 710 (47.3%) | 934 (62.3%) | +14.9 pp | 702 |
-| LLaMA-2-13B | English | 674 (44.9%) | 669 (44.6%) | -0.3 pp | 565 |
+| ChatGLM3-6B | Chinese | 534 (35.6%) | 1,242 (82.8%) | +47.2 pp | 921 |
+| ChatGLM3-6B | English | 542 (36.1%) | 1,149 (76.6%) | +40.5 pp | 871 |
+| ChatGLM4-9B | Chinese | 659 (43.9%) | 1,104 (73.6%) | +29.7 pp | 1,035 |
+| ChatGLM4-9B | English | 1,142 (76.1%) | 1,188 (79.2%) | +3.1 pp | 783 |
+| LLaMA-2-13B | Chinese | 710 (47.3%) | 934 (62.3%) | +14.9 pp | 700 |
+| LLaMA-2-13B | English | 674 (44.9%) | 669 (44.6%) | -0.3 pp | 563 |
 
 The large movement between the automatic labels and the human-reviewed labels means the Gatekeeper v2 labels should not be treated as final ground truth. They remain in the result files only as an audit trail for the earlier scoring pass.
 

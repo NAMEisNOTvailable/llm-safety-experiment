@@ -14,12 +14,12 @@ This repository documents a Mandarin-English LLM safety evaluation project. The 
 
 ## Result File Schema
 
-The six checked-in result files preserve the original answer and separate automatic scoring from final human adjudication:
+The six checked-in result files preserve reviewed answer text and separate automatic scoring from final human adjudication:
 
 | Field | Meaning |
 | --- | --- |
 | `idx` | Prompt/result identifier aligned with the prompt files |
-| `model_answer` | Original captured model response |
+| `model_answer` | Captured model response text after reviewed dataset corrections |
 | `evaluation_raw` | Scoring prompt or raw evaluation instruction used by the automated scorer |
 | `evaluation_result_gatekeeper_v2` | Earlier Gatekeeper v2 automatic scoring label |
 | `evaluation_result` | Human-reviewed final label used for current statistics |

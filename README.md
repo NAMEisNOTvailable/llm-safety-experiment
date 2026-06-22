@@ -20,7 +20,7 @@ This repository documents my Master of Cyber Security research work at the Unive
 | Dataset | 1,500 matched Mandarin-English prompt pairs |
 | Models evaluated | ChatGLM3-6B, ChatGLM4-9B, and LLaMA-2-13B |
 | Evaluation labels | Human-reviewed final labels: Complete Refusal, Partial Compliance, Full Compliance |
-| Main output | Preserved model responses, Gatekeeper v2 automatic labels, and human-reviewed final labels |
+| Main output | Reviewed model response text, Gatekeeper v2 automatic labels, and human-reviewed final labels |
 
 ## What This Demonstrates
 
@@ -28,7 +28,7 @@ This repository documents my Master of Cyber Security research work at the Unive
 - Compared refusal and compliance behaviour across Chinese, English, and bilingual attack styles.
 - Built Python scripts for repeatable model inference and response capture.
 - Organised model outputs so results can be reviewed, audited, and compared by language/model.
-- Preserved original model answers while separating automatic scoring from final human review.
+- Kept model-answer text with reviewed corrections while separating automatic scoring from final human review.
 - Framed results as security evaluation evidence, with attention to partial compliance and risk interpretation.
 
 ## Repository Structure
@@ -54,7 +54,7 @@ README.md       Project overview and inspection guide
 | `data/results/*_results_English.jsonl` | English model responses with Gatekeeper v2 labels and human-reviewed final labels |
 | `build/raw_results/*.jsonl` | Ignored raw inference outputs from local reruns before human-review merge |
 
-Result files keep the original `model_answer` once. The earlier automatic label is stored as `evaluation_result_gatekeeper_v2`; the final human-reviewed label is stored as `evaluation_result`; `adjudication_reason` records the review rationale.
+Result files keep `model_answer` once. The earlier automatic label is stored as `evaluation_result_gatekeeper_v2`; the final human-reviewed label is stored as `evaluation_result`; `adjudication_reason` records the review rationale.
 
 ## Script Entry Points
 
@@ -97,7 +97,7 @@ The same values can be supplied through `LLAMA2_MODEL` and `HF_OFFLOAD_DIR` when
 
 The checked-in JSONL outputs were initially produced from the scripts below. Full model inference requires externally downloaded model weights, enough GPU memory for the selected model, and any model-specific access approval or local checkpoint mirror required by the model provider.
 
-The current result files also include a later human review pass. The original model answers remain in `model_answer`, the earlier Gatekeeper v2 automatic labels remain in `evaluation_result_gatekeeper_v2`, and the human-reviewed final labels used in `docs/RESULTS_SUMMARY.md` are stored in `evaluation_result`.
+The current result files also include a later human review and dataset-correction pass. Reviewed model-answer text is stored in `model_answer`, the earlier Gatekeeper v2 automatic labels remain in `evaluation_result_gatekeeper_v2`, and the human-reviewed final labels used in `docs/RESULTS_SUMMARY.md` are stored in `evaluation_result`.
 
 Model reruns should write to `build/raw_results/`, which is ignored by Git. Do not point inference scripts directly at `data/results/`, because that would overwrite the human-reviewed final files.
 
